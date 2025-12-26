@@ -11,10 +11,7 @@ export default function MarketplacePage() {
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
-      .then(data => {
-        console.log(data)
-        setProducts(data)
-      })
+      .then(data => setProducts(data))
   }, [])
 
   return (
