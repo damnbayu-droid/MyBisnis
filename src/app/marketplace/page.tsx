@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -10,12 +11,19 @@ export default function MarketplacePage() {
   useEffect(() => {
     fetch('/api/products')
       .then(res => res.json())
-      .then(data => setProducts(data))
+      .then(data => {
+        console.log(data)
+        setProducts(data)
+      })
   }, [])
 
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Marketplace</h1>
+
+      {products.length === 0 && (
+        <p>Produk belum tersedia</p>
+      )}
 
       <div className="grid md:grid-cols-3 gap-6">
         {products.map(product => (
@@ -23,6 +31,7 @@ export default function MarketplacePage() {
             <CardHeader>
               <CardTitle>{product.name}</CardTitle>
             </CardHeader>
+
             <CardContent>
               <p className="text-sm mb-2">
                 {product.store_name}
@@ -32,9 +41,11 @@ export default function MarketplacePage() {
                 Rp {product.price.toLocaleString('id-ID')}
               </p>
 
-              <Button className="w-full">
-                Lihat Produk
-              </Button>
+              <Link href={`/marketplace/${product.id}`}>
+                <Button className="w-full">
+                  Lihat Produk
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         ))}
