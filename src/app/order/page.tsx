@@ -12,12 +12,17 @@ export default function OrderPage() {
 
   return (
     <div className="p-8 max-w-xl">
-      <h1 className="text-3xl font-bold mb-6">Ringkasan Pesanan</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        Ringkasan Pesanan
+      </h1>
 
       <div className="border rounded-lg p-4 mb-6">
-        <p className="mb-2"><b>Produk:</b> {name}</p>
-        <p className="mb-2"><b>Toko:</b> {store}</p>
-        <p className="mb-2"><b>Harga:</b> Rp {Number(price).toLocaleString('id-ID')}</p>
+        <p><b>Produk:</b> {name}</p>
+        <p><b>Toko:</b> {store}</p>
+        <p>
+          <b>Harga:</b>{' '}
+          {price ? `Rp ${Number(price).toLocaleString('id-ID')}` : '-'}
+        </p>
       </div>
 
       <Button className="w-full">
