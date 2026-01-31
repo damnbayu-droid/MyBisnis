@@ -3,6 +3,7 @@
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Sparkles, Store, ShoppingBag, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 interface StartBusinessCTAProps {
     language: 'id' | 'en'
@@ -12,6 +13,7 @@ interface StartBusinessCTAProps {
 
 export default function StartBusinessCTA({ language, onOpenRegister, onOpenGuide }: StartBusinessCTAProps) {
     const isId = language === 'id'
+    const router = useRouter()
 
     const steps = [
         {
@@ -74,14 +76,14 @@ export default function StartBusinessCTA({ language, onOpenRegister, onOpenGuide
                             className="bg-gradient-to-r from-amber-400 to-amber-600 text-slate-900 hover:from-amber-500 hover:to-amber-700 text-lg px-8 py-6 rounded-2xl shadow-xl shadow-amber-500/20 hover:scale-105 transition-all duration-300 font-bold group"
                             onClick={onOpenGuide}
                         >
-                            {isId ? "Mulai Sekarang Gratis" : "Start Now for Free"}
+                            {isId ? "Mulai Gratis" : "Start Free"}
                             <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                         <Button
                             variant="outline"
                             size="lg"
                             className="border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white text-lg px-8 py-6 rounded-2xl backdrop-blur-sm"
-                            onClick={onOpenGuide}
+                            onClick={() => router.push('/info')}
                         >
                             {isId ? "Pelajari Dulu" : "Learn More"}
                         </Button>

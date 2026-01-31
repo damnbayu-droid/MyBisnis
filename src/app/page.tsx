@@ -22,6 +22,8 @@ const RegisterModal = dynamic(() => import('@/components/modals/RegisterModal'),
 const GuideModal = dynamic(() => import('@/components/modals/GuideModal'), { ssr: false })
 const CourierMapModal = dynamic(() => import('@/components/modals/CourierMapModal'), { ssr: false })
 const WebsiteOrderModal = dynamic(() => import('@/components/modals/WebsiteOrderModal'), { ssr: false })
+const FormspreeModal = dynamic(() => import('@/components/modals/FormspreeModal'), { ssr: false })
+const PartnerGuideModal = dynamic(() => import('@/components/modals/PartnerGuideModal'), { ssr: false })
 
 import ChatWidget from '@/components/chat/ChatWidget'
 import StartBusinessCTA from '@/components/landing/StartBusinessCTA'
@@ -36,6 +38,8 @@ export default function Home() {
   const [showGuideModal, setShowGuideModal] = useState(false)
   const [showCourierMap, setShowCourierMap] = useState(false)
   const [showWebsiteOrder, setShowWebsiteOrder] = useState(false)
+  const [showPartnerModal, setShowPartnerModal] = useState(false)
+  const [showPartnerGuide, setShowPartnerGuide] = useState(false)
   const [selectedWebsiteType, setSelectedWebsiteType] = useState('')
 
   const [currentUser, setCurrentUser] = useState(null)
@@ -152,7 +156,7 @@ export default function Home() {
       <StartBusinessCTA
         language={language}
         onOpenRegister={() => setShowRegisterModal(true)}
-        onOpenGuide={() => setShowGuideModal(true)}
+        onOpenGuide={() => setShowPartnerGuide(true)}
       />
 
       <Pricing
@@ -210,6 +214,17 @@ export default function Home() {
         onOpenChange={setShowWebsiteOrder}
         selectedWebsiteType={selectedWebsiteType}
         setSelectedWebsiteType={setSelectedWebsiteType}
+      />
+
+      <FormspreeModal
+        isOpen={showPartnerModal}
+        onOpenChange={setShowPartnerModal}
+      />
+
+      <PartnerGuideModal
+        isOpen={showPartnerGuide}
+        onOpenChange={setShowPartnerGuide}
+        onOpenForm={() => setShowPartnerModal(true)}
       />
 
       {/* Search/Chat Widget - Only on Landing Page */}
