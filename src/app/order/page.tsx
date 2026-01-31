@@ -2,8 +2,9 @@
 
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Suspense } from 'react'
 
-export default function OrderPage() {
+function OrderContent() {
   const searchParams = useSearchParams()
 
   const name = searchParams.get('name')
@@ -29,5 +30,13 @@ export default function OrderPage() {
         Konfirmasi Pesanan (Dummy)
       </Button>
     </div>
+  )
+}
+
+export default function OrderPage() {
+  return (
+    <Suspense fallback={<div>Loading order details...</div>}>
+      <OrderContent />
+    </Suspense>
   )
 }
