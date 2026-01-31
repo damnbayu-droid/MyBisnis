@@ -20,12 +20,10 @@ export default function ChatWidget() {
     ])
     const [input, setInput] = useState('')
     const [isLoading, setIsLoading] = useState(false)
-    const scrollRef = useRef<HTMLDivElement>(null)
+    const messagesEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollTo(0, scrollRef.current.scrollHeight)
-        }
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
     }, [messages, isOpen])
 
     const handleSend = async () => {
@@ -67,7 +65,7 @@ export default function ChatWidget() {
     }
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-20 right-6 z-50 flex flex-col items-end">
             {/* Chat Window */}
             <div className={cn(
                 "transition-all duration-300 ease-in-out transform origin-bottom-right mb-4",
@@ -95,7 +93,7 @@ export default function ChatWidget() {
                     </div>
 
                     {/* Messages Area */}
-                    <ScrollArea className="flex-1 p-4 bg-slate-950/50" ref={scrollRef}>
+                    <ScrollArea className="flex-1 p-4 bg-slate-950/50">
                         <div className="flex flex-col gap-4">
                             {messages.map((msg, idx) => (
                                 <div key={idx} className={cn(
@@ -120,12 +118,12 @@ export default function ChatWidget() {
                                 </div>
                             )}
                             {/* Dummy div for auto scroll */}
-                            <div ref={scrollRef} />
+                            <div ref={messagesEndRef} />
                         </div>
                     </ScrollArea>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-slate-900 border-t border-slate-800">
+                    <div className="p-4 bg-slate-900 border-t border-slate-800 flex-shrink-0">
                         <form
                             onSubmit={(e) => {
                                 e.preventDefault()
