@@ -1,117 +1,204 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
 }
 
 model User {
-  user_id     String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  whatsapp    String?
-  role        String   // 'pembeli', 'penjual', 'pengirim', 'admin'
-  status      String   @default("active") // 'active', 'blocked'
-  lokasi      String?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  user_id             String    @id @default(uuid())
+  name                String
+  email               String    @unique
+  whatsapp            String?
+  role                String    @default("pembeli") // pembeli, penjual, kurir, admin
+  status              String    @default("active")
+  verification_status String    @default("unverified")
+  subscription_tier   String    @default("free")
+  subscription_end    DateTime?
+  lokasi              String?
+  avatar_url          String?
+  slug                String?   @unique // For profile link: mybisnis.app/slug
+  score               Int       @default(1000) // Gamification Score
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
 
   // Relations
-  stores      Store[]
-  couriers    Courier[]
-  sentMessages    Message[] @relation("SentMessages")
-  receivedMessages Message[] @relation("ReceivedMessages")
+  stores               Store[]
+  courier_profile      Courier?
+  orders_as_buyer      Order[]               @relation("BuyerOrders")
+  messages_sent        Message[]             @relation("SentMessages")
+  messages_received    Message[]             @relation("ReceivedMessages")
+  verification_requests VerificationRequest[]
 
   @@map("users")
 }
 
 model Store {
-  store_id          String   @id @default(cuid())
-  owner_user_id     String
-  nama_toko         String
-  jenis_toko        String?
-  deskripsi         String?
-  link_toko         String   @unique
-  payment_qris      Boolean  @default(false)
-  payment_transfer  Boolean  @default(false)
-  payment_cash      Boolean  @default(false)
-  payment_rekening  String?
-  verified          Boolean  @default(false)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  store_id         String   @id @default(uuid())
+  owner_user_id    String?
+  nama_toko        String
+  jenis_toko       String?
+  deskripsi        String?
+  link_toko        String   @unique
+  payment_qris     Boolean  @default(false)
+  payment_transfer Boolean  @default(false)
+  payment_cash     Boolean  @default(false)
+  payment_rekening String?
+  verified         Boolean  @default(false)
+  score            Int      @default(1000) // Seller Score for algorithm
+  response_rate    Int      @default(100) // Percentage
+  response_time    Int      @default(60) // Minutes
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
   // Relations
-  owner             User       @relation(fields: [owner_user_id], references: [user_id], onDelete: Cascade)
-  products          Product[]
+  owner    User?     @relation(fields: [owner_user_id], references: [user_id])
+  products Product[]
+  orders   Order[]
 
   @@map("stores")
 }
 
 model Product {
-  product_id      String   @id @default(cuid())
-  store_id        String
-  nama_produk     String
-  harga           Float
-  foto            String?
-  jenis_produk    String?
-  keterangan      String?
-  kuantitas       Int?
-  jumlah_klik     Int      @default(0)
-  jumlah_order    Int      @default(0)
-  status          String   @default("active") // 'active', 'inactive'
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  product_id   String   @id @default(uuid())
+  store_id     String?
+  nama_produk  String
+  harga        Float
+  foto         String?
+  jenis_produk String?
+  keterangan   String?
+  kuantitas    Int?
+  jumlah_klik  Int      @default(0)
+  jumlah_order Int      @default(0)
+  status       String   @default("active")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
   // Relations
-  store           Store     @relation(fields: [store_id], references: [store_id], onDelete: Cascade)
+  store       Store?      @relation(fields: [store_id], references: [store_id])
+  order_items OrderItem[]
 
   @@map("products")
 }
 
 model Courier {
-  courier_id           String   @id @default(cuid())
-  user_id              String
-  tipe                 String   // 'ompreng', 'bentor', 'deliv', 'roda4'
-  kendaraan            String?
-  zona                 String?
-  latitude             Float?
-  longitude            Float?
-  online               Boolean  @default(false)
-  pendapatan_harian    Float    @default(0)
-  target_pengantaran   Int?
-  kilometer_harian      Float?
-  created_at           DateTime @default(now())
-  updated_at           DateTime @updatedAt
-  foto_driver          String?
-  foto_kendaraan       String?
-  foto_plat_nomor      String?
-  foto_stnk            String?
+  courier_id       String   @id @default(uuid())
+  user_id          String?  @unique
+  tipe             String
+  kendaraan        String?
+  plat_nomor       String?
+  zona             String?
+  latitude         Float?
+  longitude        Float?
+  online           Boolean  @default(false)
+  pendapatan_harian Float    @default(0)
+  target_pengantaran Int?
+  kilometer_harian Float?
+  rating           Float    @default(5.0)
+  total_orders     Int      @default(0)
+  foto_driver      String?
+  foto_kendaraan   String?
+  foto_plat_nomor  String?
+  foto_stnk        String?
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
 
   // Relations
-  user                 User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  user   User?   @relation(fields: [user_id], references: [user_id])
+  orders Order[]
 
   @@map("couriers")
 }
 
-model Message {
-  id                   String   @id @default(cuid())
-  sender_id             String
-  receiver_id           String
-  content               String
-  read                 Boolean  @default(false)
-  created_at            DateTime @default(now())
+model Order {
+  order_id        String   @id @default(uuid())
+  buyer_id        String?
+  store_id        String?
+  courier_id      String?
+  status          String   @default("pending")
+  total_amount    Float
+  delivery_fee    Float    @default(0)
+  platform_fee    Float    @default(0)
+  pickup_address  String?
+  delivery_address String?
+  payment_method  String?
+  payment_status  String   @default("unpaid")
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
   // Relations
-  sender               User?    @relation("SentMessages", fields: [sender_id], references: [user_id])
-  receiver              User?    @relation("ReceivedMessages", fields: [receiver_id], references: [user_id])
+  buyer       User?       @relation("BuyerOrders", fields: [buyer_id], references: [user_id])
+  store       Store?      @relation(fields: [store_id], references: [store_id])
+  courier     Courier?    @relation(fields: [courier_id], references: [courier_id])
+  order_items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String @id @default(uuid())
+  order_id   String?
+  product_id String?
+  quantity   Int
+  price      Float
+
+  // Relations
+  order   Order?   @relation(fields: [order_id], references: [order_id])
+  product Product? @relation(fields: [product_id], references: [product_id])
+
+  @@map("order_items")
+}
+
+model Message {
+  id          String   @id @default(uuid())
+  sender_id   String?
+  receiver_id String?
+  content     String
+  read        Boolean  @default(false)
+  created_at  DateTime @default(now())
+
+  // Relations
+  sender   User? @relation("SentMessages", fields: [sender_id], references: [user_id])
+  receiver User? @relation("ReceivedMessages", fields: [receiver_id], references: [user_id])
 
   @@map("messages")
+}
+
+model SystemLog {
+  id         String   @id @default(uuid())
+  level      String
+  module     String
+  message    String
+  metadata   String?
+  created_at DateTime @default(now())
+
+  @@map("system_logs")
+}
+
+model SystemStat {
+  id          String   @id @default(uuid())
+  metric      String
+  value       Float
+  dimension   String?
+  recorded_at DateTime @default(now())
+
+  @@map("system_stats")
+}
+
+model VerificationRequest {
+  id          String   @id @default(uuid())
+  user_id     String?
+  type        String
+  status      String   @default("pending")
+  documents   String?
+  admin_notes String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relations
+  user User? @relation(fields: [user_id], references: [user_id])
+
+  @@map("verification_requests")
 }
